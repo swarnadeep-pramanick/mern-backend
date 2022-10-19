@@ -19,25 +19,21 @@ let places = [
   },
 ];
 
-const getPlaceById = (req, res, next) => {
+const getPlaceById = async(req, res, next) => {
   const placeId = req.params.pid;
-  const place = places.find((p) => {
-    return p.id === placeId;
-  });
+  const place = await Place.findById(placeId)
   if (!place) {
     res.status(404).json("Not Found");
   }
-  res.status(200).json(place);
+  res.status(200).json(place.toObject({ getters:true }));
 };
-const getPlacesByUid = (req, res, next) => {
+const getPlacesByUid = async (req, res, next) => {
   const userId = req.params.userid;
-  const place = places.filter((p) => {
-    return p.creatorId === userId;
-  });
-  if (!place) {
+  const places = await Place.find({ creator:userId })
+  if (places.length < 1) {
     res.status(404).json("Not Found");
   }
-  res.status(200).json(place);
+  res.status(200).json({places:places.map(pl => pl.toObject({ getters:true }))});
 };
 
 const createPlace = async (req,res,next) => {
@@ -54,24 +50,37 @@ const createPlace = async (req,res,next) => {
     else res.status(500).json({message:"Something went wrong"})
 }   
 
-const updatePlace = (req,res,next) => {
+const updatePlace = async(req,res,next) => {
     const pid = req.params.pid
     const {  title,description  } = req.body
-    const place = places.find(pl => pl.id === pid)
+    const place = await Place.findById(pid)
+    
     if(place){
         place.title = title
         place.description = description
-        res.status(200).json(place)
+        try{
+          await place.save()
+          res.status(200).json(place.toObject({ getters:true }))
+        }catch(e){
+          res.status(500).json({message:"Something Went Wrong"})
+        }
     }
     else{
         res.status(404).json("Place Not Found")
     }
 }
 
-const deletePlace = (req,res,next) => {
+const deletePlace = async(req,res,next) => {
     const pid = req.params.pid 
-    places = places.filter(p => p.id !== pid)
-    res.status(200).json({message:"Deleted Successfully"})
+    const place = await Place.findById(pid)
+    if(!place) res.status(404).json({message:"invalid id"})
+    try{
+      await place.remove()
+      res.status(200).json({message:"Deleted Successfully"})
+    }catch(err){
+      res.status(500).json({message:err})
+    }
+    
 }
 
 exports.getPlaceById = getPlaceById
