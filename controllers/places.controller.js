@@ -1,6 +1,8 @@
 const e = require('express');
 const uuid= require('uuid');
 
+const Place = require('../models/places')
+
 let places = [
   {
     id: "p1",
@@ -38,18 +40,18 @@ const getPlacesByUid = (req, res, next) => {
   res.status(200).json(place);
 };
 
-const createPlace = (req,res,next) => {
-    const { title,description,address,coordinates,creator } = req.body
-    const createdPlace = {
-        id:uuid.v4(),
-        title: title,
-        description: description,
-        address: address,
-        location: coordinates,
-        creatorId:creator
-    }
-    places.push(createdPlace)
-    res.status(201).json(places)
+const createPlace = async (req,res,next) => {
+    const { title,description,address,coordinates,creator,image } = req.body
+    const createdPlace = new Place({
+      title,
+      description,
+      address,
+      image,
+      location:coordinates,
+      creator
+    })
+    if(await createdPlace.save()) res.status(201).json(createdPlace)
+    else res.status(500).json({message:"Something went wrong"})
 }   
 
 const updatePlace = (req,res,next) => {
