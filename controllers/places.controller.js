@@ -77,11 +77,13 @@ const deletePlace = async(req,res,next) => {
     const pid = req.params.pid 
     const place = await Place.findById(pid)
     if(!place) res.status(404).json({message:"invalid id"})
-    try{
-      await place.remove()
-      res.status(200).json({message:"Deleted Successfully"})
-    }catch(err){
-      res.status(500).json({message:err})
+    else{
+      try{
+        await place.remove()
+        res.status(200).json({message:"Deleted Successfully"})
+      }catch(err){
+        res.status(500).json({message:err})
+      }
     }
     
 }

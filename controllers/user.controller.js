@@ -10,14 +10,14 @@ const createUser = async (req, res, next) => {
     email,
     password: hash,
     image,
-    places: []
+    places: [],
   });
   await newUser.save();
   res.status(201).json(newUser);
 };
 
 const getAllUsers = async (req, res, next) => {
-  let users = await User.find({}, '-password');
+  let users = await User.find({}, "-password");
   if (users.length < 1) res.status(404).json({ message: "Users Not Found" });
   res
     .status(200)
@@ -61,8 +61,13 @@ const updateUser = async (req, res, next) => {
 const deleteUser = async (req, res, next) => {
   const uid = req.params.uid;
   const user = await User.findById(uid);
-  await user.remove();
-  res.status(200).json({ message: "User deleted successfully" });
+  if(!user){
+    res.status(404).json({ message:"User not found" })
+  }
+  else{
+    await user.remove();
+    res.status(200).json({ message: "User deleted successfully" });
+  }
 };
 
 const updatePassword = async (req, res, next) => {
@@ -70,12 +75,14 @@ const updatePassword = async (req, res, next) => {
   const { password } = req.body;
   const user = await User.findById(uid);
   if (!user) res.status(404).json({ message: "User not found" });
-  const hash = bcrypt.hashSync(password, saltRounds);
-  user.password = hash;
-  await user.save();
-  res.status(200).json({
-    message: "Password Updated",
-  });
+  else{
+    const hash = bcrypt.hashSync(password, saltRounds);
+    user.password = hash;
+    await user.save();
+    res.status(200).json({
+      message: "Password Updated",
+    });
+  }
 };
 
 exports.createUser = createUser;
