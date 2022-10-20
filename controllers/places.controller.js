@@ -1,23 +1,8 @@
 const e = require('express');
-const uuid= require('uuid');
+const User = require('../models/user')
 
 const Place = require('../models/places')
 
-let places = [
-  {
-    id: "p1",
-    title: "Empire Building",
-    description: "New York",
-    address: "NY city",
-    imageUrl:
-      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRO3VVDMNZlYn4QzAsUx0P-dC_e5ip6nuD4tJMBtc3jtXKIvD_BYXsJ8BZ5Tzc-GvnQs-8&usqp=CAU",
-    creatorId: "u1",
-    location: {
-      lat: 23.1745,
-      lng: 88.5606,
-    },
-  },
-];
 
 const getPlaceById = async(req, res, next) => {
   const placeId = req.params.pid;
@@ -46,8 +31,26 @@ const createPlace = async (req,res,next) => {
       location:coordinates,
       creator
     })
-    if(await createdPlace.save()) res.status(201).json(createdPlace)
-    else res.status(500).json({message:"Something went wrong"})
+    let user = await User.findById(creator)
+    if(!user){
+      res.status(404).json({
+        messaeg:"Users not found"
+      })
+    }
+    
+      
+    try{
+      const sess = await mongoose.startSession()
+      sess.startTransaction()
+      await createdPlace.save({ session:sess })
+      user.places.push(createdPlace)
+      await user.save({ session:sess })
+      await sess.commitTransaction()
+      res.status(201).json(createdPlace)
+    }
+    catch(err){
+      res.status(500).json({message:"Something went wrong"})
+  }
 }   
 
 const updatePlace = async(req,res,next) => {
