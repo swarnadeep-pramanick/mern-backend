@@ -13,6 +13,14 @@ app.use(body_parser.json())
 app.use('/api/places',placesRoutes)
 app.use('/api/user',userRoutes)
 
+app.use((error,req,res,next) => {
+    if(res.headerSent){
+        return next(error)
+    }
+    res.status(error.code || 500)
+    res.json({message: error.message || "Unknown error"})
+})
+
 mongoose
     .connect('mongodb+srv://SDP07:DWM7rnRUPk0CqhNL@cluster0.szlt8pq.mongodb.net/places?retryWrites=true&w=majority')
     .then(() => {
