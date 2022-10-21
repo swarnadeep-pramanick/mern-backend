@@ -8,6 +8,7 @@ router.get('/all',userController.getAllUsers)
 router.post('/login',userController.getUserByEmail)
 router.patch('/update/password/:uid',userController.updatePassword)
 router.patch('/update/:uid',userController.updateUser)
+router.get('/by-token',userController.getUserByToken)
 router.delete('/delete/:uid',userController.deleteUser)
 router.get('/:uid',userController.getUserById)
 
