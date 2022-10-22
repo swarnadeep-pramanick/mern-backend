@@ -36,7 +36,7 @@ const getAllUsers = async (req, res, next) => {
   if (users.length < 1) return next(new HttpError("Users not found",404))
   res
     .status(200)
-    .json({ users: users.map((us) => us.toObject({ getters: true })) });
+    .json({ users: users.map(us => us.toObject({ getters:true }))});
 };
 
 const getUserByEmail = async (req, res, next) => {

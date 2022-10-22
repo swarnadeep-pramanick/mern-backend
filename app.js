@@ -2,6 +2,9 @@ const express = require('express')
 const body_parser = require('body-parser')
 const mongoose = require('mongoose')
 
+const env = require('dotenv')
+env.config()
+
 
 const placesRoutes = require('./routes/places-routes')
 const userRoutes = require('./routes/user-routes')
@@ -11,7 +14,7 @@ const app = express()
 app.use(body_parser.json())
 
 app.use((req,res,next) => {
-    res.setHeader('Access-Control-Allow-Origin','*');
+    res.setHeader('Access-Control-Allow-Origin',process.env.CORS_URLS);
     res.setHeader(
       "Access-Control-Allow-Headers",
       "Origin, X-Requested-Width,Content-Type, Accept, Authorization"
@@ -32,7 +35,7 @@ app.use((error,req,res,next) => {
 })
 
 mongoose
-    .connect('mongodb+srv://SDP07:DWM7rnRUPk0CqhNL@cluster0.szlt8pq.mongodb.net/places?retryWrites=true&w=majority')
+    .connect(process.env.MONGODB_URL)
     .then(() => {
         app.listen(5000)
     })
